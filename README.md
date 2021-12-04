@@ -1,0 +1,2 @@
+# gcg
+golang code generator
