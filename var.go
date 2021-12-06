@@ -19,7 +19,7 @@ package gcg
 import "io"
 
 func Var(name string) (code Code) {
-	//  statement
+	//  所有xxxs改成group渲染，group内式tokens，lit改成token，var里用token
 	return
 }
 
