@@ -16,6 +16,13 @@
 
 package gcg
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strings"
+)
+
 var emptyImports = NewImports()
 
 func NewImports() Imports {
@@ -24,7 +31,36 @@ func NewImports() Imports {
 
 type Imports []*Import
 
-func (n Imports) Empty(v bool) {
+func (n Imports) Render(w io.Writer) (err error) {
+	if n.Empty() {
+		return
+	}
+	buf := bytes.NewBufferString("import (\n")
+	for _, i := range n {
+		path := strings.TrimSpace(i.Path)
+		if path == "" {
+			err = fmt.Errorf("render import failed for path is empty")
+			return
+		}
+		buf.WriteString("\t")
+		alias := strings.TrimSpace(i.Alias)
+		if alias != "" {
+			_, err = buf.Write([]byte(alias + " "))
+		}
+		_, err = buf.Write([]byte(`"` + path + `"`))
+		buf.WriteString("\n")
+	}
+	buf.WriteString(")\n")
+	_, err = buf.WriteTo(w)
+	return
+}
+
+func (n Imports) imports() (imports Imports) {
+	imports = n
+	return
+}
+
+func (n Imports) Empty() (v bool) {
 	v = len(n) == 0
 	return
 }
@@ -43,7 +79,7 @@ func (n *Imports) Add(v *Import) {
 	*n = append(*n, v)
 }
 
-func (n *Imports) Merge(x Imports) {
+func (n Imports) Merge(x Imports) {
 	if x == nil || len(x) == 0 {
 		return
 	}
@@ -56,4 +92,25 @@ type Import struct {
 	Name  string
 	Alias string
 	Path  string
+}
+
+func (i Import) Render(w io.Writer) (err error) {
+	path := strings.TrimSpace(i.Path)
+	if path == "" {
+		err = fmt.Errorf("render import failed for path is empty")
+		return
+	}
+	_, err = w.Write([]byte("import "))
+	alias := strings.TrimSpace(i.Alias)
+	if alias != "" {
+		_, err = w.Write([]byte(alias + " "))
+	}
+	_, err = w.Write([]byte(`"` + path + `"\n`))
+	return
+}
+
+func (i *Import) imports() (imports Imports) {
+	imports = NewImports()
+	imports.Add(i)
+	return
 }

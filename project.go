@@ -22,12 +22,12 @@ type Project struct {
 	License   string
 	README    string
 	GITIGNORE string
-	Files     []*FileGenerator
+	Files     []*File
 }
 
 type Folder struct {
 	Name     string
-	Files    []*FileGenerator
+	Files    []*File
 	Children []*Folder
 }
 

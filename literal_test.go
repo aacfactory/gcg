@@ -23,24 +23,23 @@ import (
 	"testing"
 )
 
-func TestNewImports(t *testing.T) {
-	imports := gcg.NewImports()
-	imports.Add(&gcg.Import{
-		Name:  "foo",
-		Alias: "bar",
-		Path:  "x/foo",
-	})
-	imports.Add(&gcg.Import{
-		Name:  "foo",
-		Alias: "bar",
-		Path:  "x/foo",
-	})
-	imports.Add(&gcg.Import{
-		Name: "boo",
-		Path: "x/boo",
-	})
-	for _, i := range imports {
-		fmt.Println(i)
-	}
-	_ = imports.Render(os.Stdout)
+func TestLiteral(t *testing.T) {
+	n := gcg.Literal(nil)
+	fmt.Println(n.Render(os.Stdout))
+	s := gcg.Literal("string")
+	fmt.Println(s.Render(os.Stdout))
+	i := gcg.Literal(1)
+	fmt.Println(i.Render(os.Stdout))
+	i8 := gcg.Literal(int8(2))
+	fmt.Println(i8.Render(os.Stdout))
+	u := gcg.Literal(uint(3))
+	fmt.Println(u.Render(os.Stdout))
+	u64 := gcg.Literal(uint64(64))
+	fmt.Println(u64.Render(os.Stdout))
+	cp := gcg.Literal(complex64(65.44))
+	fmt.Println(cp.Render(os.Stdout))
+	p := gcg.Literal([]byte(`xx`))
+	fmt.Println(p.Render(os.Stdout))
+	b := gcg.LiteralByte(byte('b'))
+	fmt.Println(b.Render(os.Stdout))
 }

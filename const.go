@@ -19,108 +19,137 @@ package gcg
 import (
 	"bytes"
 	"fmt"
-	"sort"
+	"io"
 	"strings"
 )
 
-func NewConstant(name string, value TypeExpr) (v *Constant, err error) {
+func Constant(name string, lit interface{}, comments ...string) (code Code) {
 	name = strings.TrimSpace(name)
 	if name == "" {
-		err = fmt.Errorf("gcg: new contant failed for name is empty")
+		panic(fmt.Errorf("gcg: new contant failed for name is empty"))
 		return
 	}
-	if value == nil {
-		err = fmt.Errorf("gcg: new contant failed for value is empty")
+	if lit == nil {
+		panic(fmt.Errorf("gcg: new contant failed for lit is empty"))
 		return
 	}
-	code, codeErr := value.Type().ValueStatement().Code()
-	if codeErr != nil {
-		err = fmt.Errorf("gcg: new contant failed for %v", codeErr)
-		return
-	}
-	cv := ""
-	switch value.Type().Kind {
-	case "string":
-		cv = code
-	case "bool":
-		cv = code
-	case "int", "int8", "int16", "int32", "int64":
-		cv = code
-	case "uint", "uint8", "uint16", "uint32", "uint64":
-		cv = code
-	case "float32", "float64":
-		cv = code
+	var litCode Code
+	switch lit.(type) {
+	case string:
+		litCode = Literal(lit)
+	case bool:
+		litCode = Literal(lit)
+	case int, int8, int16, int32, int64:
+		litCode = Literal(lit)
+	case uint, uint8, uint16, uint32, uint64:
+		litCode = Literal(lit)
+	case float32, float64:
+		litCode = Literal(lit)
 	default:
-		err = fmt.Errorf("gcg: new contant failed for type of value is not supported")
+		panic(fmt.Sprintf("gcg: unsupported type for contant: %T", lit))
 		return
 	}
-	v = &Constant{
-		name:  name,
-		value: cv,
+	code = &constant{
+		name:     name,
+		lit:      litCode,
+		comments: Comments(comments),
 	}
 	return
 }
 
-type Constant struct {
-	name  string
-	value string
+type constant struct {
+	name     string
+	lit      Code
+	comments Code
 }
 
-func (c Constant) Code() (code string, err error) {
-	code = fmt.Sprintf("const %s = %s", c.name, c.value)
+func (c constant) Render(w io.Writer) (err error) {
+	buf := bytes.NewBufferString("")
+	_ = c.comments.Render(w)
+	buf.WriteString(fmt.Sprintf("const %s = ", c.name))
+	err = c.lit.Render(buf)
+	if err != nil {
+		err = fmt.Errorf("render constant %s failed, %v", c.name, err)
+		return
+	}
+	buf.WriteString("\n")
+	p, fmtErr := reformat(buf.Bytes())
+	if fmtErr != nil {
+		err = fmt.Errorf("render constant %s failed, %v", c.name, err)
+		return
+	}
+	_, err = w.Write(p)
+	if err != nil {
+		err = fmt.Errorf("render constant %s failed, %v", c.name, err)
+		return
+	}
 	return
 }
 
-func (c Constant) Imports() (imports Imports) {
-	imports = NewImports()
+func (c constant) imports() (imports Imports) {
+	imports = emptyImports
 	return
 }
 
-func (c Constant) Build() (imports Imports, code string, err error) {
-	imports = NewImports()
-	code, err = c.Code()
-	return
-}
-
-func NewConstants() (v Constants) {
-	v = make([]*Constant, 0, 1)
-	return
-}
-
-type Constants []*Constant
-
-func (c *Constants) Add(v *Constant) (err error) {
-	added := false
-	for _, constant := range *c {
-		if constant.name == v.name {
-			added = true
-			break
+func Constants(v ...Code) (code Code) {
+	cc := constants(make([]*constant, 0, 1))
+	if v == nil || len(v) == 0 {
+		return
+	}
+	for _, c := range v {
+		x, ok := c.(*constant)
+		if !ok {
+			panic(fmt.Sprintf("gcg: unsupported type for contant: %T", c))
+			return
 		}
+		cc.add(x)
 	}
-	if added {
-		err = fmt.Errorf("gcg: contants add failed for %s is added", v.name)
-		return
-	}
+	code = cc
+	return
+}
+
+type constants []*constant
+
+func (c *constants) add(v *constant) {
 	*c = append(*c, v)
 	return
 }
 
-func (c Constants) Code() (code string, err error) {
-	sort.Slice(c, func(i, j int) bool {
-		return c[i].name < c[j].name
-	})
-	buf := bytes.NewBufferString("")
-	buf.WriteString("const (")
-	for _, constant := range c {
-		buf.WriteString(fmt.Sprintf("\t%s = %s", constant.name, constant.value))
+func (c constants) Render(w io.Writer) (err error) {
+	if len(c) == 0 {
+		return
 	}
-	buf.WriteString(")")
-	code = buf.String()
+	buf := bytes.NewBufferString("")
+	buf.WriteString("const (\n")
+	for _, v := range c {
+		cc := bytes.NewBufferString("")
+		_ = v.comments.Render(cc)
+		if cc.Len() > 0 {
+			buf.WriteString(fmt.Sprintf("\t%s", cc.String()))
+		}
+		bb := bytes.NewBufferString("")
+		err = v.lit.Render(bb)
+		if err != nil {
+			err = fmt.Errorf("render constant %s failed, %v", v.name, err)
+			return
+		}
+		buf.WriteString(fmt.Sprintf("\t%s = %s\n", v.name, bb.String()))
+	}
+	buf.WriteString(")\n")
+	p, fmtErr := reformat(buf.Bytes())
+	if fmtErr != nil {
+		err = fmt.Errorf("render constants failed, %v", err)
+		return
+	}
+	_, err = w.Write(p)
+	if err != nil {
+		err = fmt.Errorf("render constants failed, %v", err)
+		return
+	}
 	return
 }
 
-func (c Constants) Build() (imports Imports, code string, err error) {
-	imports = NewImports()
-	code, err = c.Code()
+func (c constants) imports() (imports Imports) {
+	imports = emptyImports
 	return
 }

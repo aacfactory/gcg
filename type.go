@@ -22,13 +22,3 @@ type Type struct {
 	X       *Type
 	Y       *Type
 }
-
-func (typ *Type) Statement() (stmt Statement) {
-
-	return
-}
-
-func (typ *Type) ValueStatement() (stmt Statement) {
-
-	return
-}

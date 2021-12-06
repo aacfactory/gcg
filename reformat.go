@@ -15,3 +15,17 @@
  */
 
 package gcg
+
+import (
+	"fmt"
+	"go/format"
+)
+
+func reformat(p []byte) (b []byte, err error) {
+	b, err = format.Source(p)
+	if err != nil {
+		err = fmt.Errorf("reformat code failed, %v", err)
+		return
+	}
+	return
+}

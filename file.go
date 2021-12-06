@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"go/format"
 	"golang.org/x/tools/imports"
+	"io"
 )
 
 const (
@@ -29,19 +30,18 @@ const (
 type CodeBlock struct {
 }
 
-type FileGenerator struct {
-	filePath    string
+type File struct {
 	packageName string
 	imports     Imports
-	specs       []Spec
+	decls       []Decl
 }
 
-func (f *FileGenerator) Generate() (err error) {
+func (f *File) Render(w io.Writer) (err error) {
 
 	return
 }
 
-func (f *FileGenerator) reformat(p []byte) (b []byte, err error) {
+func (f *File) reformat(p []byte) (b []byte, err error) {
 	b, err = imports.Process("", p, nil)
 	if err != nil {
 		err = fmt.Errorf("reformat code failed, %v", err)

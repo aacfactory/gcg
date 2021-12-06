@@ -16,8 +16,22 @@
 
 package gcg
 
-type Var struct {
-	Name  string
-	Type  *Type
-	Value *Type
+import "io"
+
+func Var(name string) (code Code) {
+	//  statement
+	return
+}
+
+type variable struct {
+}
+
+func (v variable) Render(w io.Writer) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (v variable) imports() (imports Imports) {
+	//TODO implement me
+	panic("implement me")
 }

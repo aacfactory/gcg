@@ -16,31 +16,41 @@
 
 package gcg
 
-import "io"
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strings"
+)
 
-type Render interface {
-	Render(w io.Writer) (err error)
-}
-
-type Code interface {
-	Render
-	imports() (imports Imports)
-}
-
-type Codes []Code
-
-func (c Codes) Render(w io.Writer) (err error) {
-	return
-}
-
-func (c Codes) imports(imports Imports) {
-	imports = NewImports()
-	for _, code := range c {
-		imports.Merge(code.imports())
+func Comments(texts []string) (code Code) {
+	code = &comments{
+		texts: texts,
 	}
 	return
 }
 
-type Decl interface {
-	Build() (code Code)
+type comments struct {
+	texts []string
+}
+
+func (c comments) Render(w io.Writer) (err error) {
+	if c.texts == nil || len(c.texts) == 0 {
+		return
+	}
+	buf := bytes.NewBufferString("")
+	for _, text := range c.texts {
+		buf.WriteString(fmt.Sprintf("// %s\n", strings.TrimSpace(text)))
+	}
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		err = fmt.Errorf("render comments failed, %v", err)
+		return
+	}
+	return
+}
+
+func (c comments) imports() (imports Imports) {
+	imports = emptyImports
+	return
 }
