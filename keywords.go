@@ -5,54 +5,45 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 	http://www.apache.org/licenses/LICENSE-2.0
+ *  	http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package gcg
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"strings"
 )
 
-func Ident(name ...string) (code Code) {
-	code = &ident{
-		names: name,
+func Keyword(ident string) (code Code) {
+	code = &keyword{
+		ident: strings.TrimSpace(ident),
 	}
 	return
 }
 
-type ident struct {
-	names []string
+type keyword struct {
+	ident string
 }
 
-func (i ident) Render(w io.Writer) (err error) {
-	buf := bytes.NewBufferString("")
-	for i, name := range i.names {
-		if i == 0 {
-			buf.WriteString(fmt.Sprintf("%s", strings.TrimSpace(name)))
-
-		} else {
-			buf.WriteString(fmt.Sprintf(", %s", strings.TrimSpace(name)))
-
-		}
-	}
-	_, err = buf.WriteTo(w)
+func (k keyword) Render(w io.Writer) (err error) {
+	_, err = w.Write([]byte(k.ident + " "))
 	if err != nil {
-		err = fmt.Errorf("render ident failed, %v", err)
+		err = fmt.Errorf("render keywork %s failed, %v", k.ident, err)
+		return
 	}
 	return
 }
 
-func (i ident) imports() (imports Imports) {
+func (k keyword) imports() (imports Imports) {
 	imports = emptyImports
 	return
 }

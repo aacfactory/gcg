@@ -16,22 +16,82 @@
 
 package gcg
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
-func Var(name string) (code Code) {
-	//  所有xxxs改成group渲染，group内式tokens，lit改成token，var里用token
+func Var(ident string) (code *Variable) {
+	code = &Variable{
+		stmt: newStatement(),
+	}
+	code.stmt.Add(Keyword("var")).Add(Space()).Add(Ident(ident))
 	return
 }
 
-type variable struct {
+type Variable struct {
+	stmt *Statement
 }
 
-func (v variable) Render(w io.Writer) (err error) {
-	//TODO implement me
-	panic("implement me")
+func (v *Variable) Type(op Code) *Variable {
+	v.stmt.Add(Space()).Add(op)
+	return v
 }
 
-func (v variable) imports() (imports Imports) {
-	//TODO implement me
-	panic("implement me")
+func (v *Variable) Op(op string) *Variable {
+	v.stmt.Add(Space()).Add(newToken(op))
+	return v
+}
+
+func (v *Variable) Value(code Code) *Variable {
+	v.stmt.Add(Space()).Add(code)
+	return v
+}
+
+func (v Variable) Render(w io.Writer) (err error) {
+	v.stmt.Add(Line())
+	err = v.stmt.Render(w)
+	if err != nil {
+		err = fmt.Errorf("render var failed, %v", err)
+		return
+	}
+	return
+}
+
+func (v Variable) imports() (imports Imports) {
+	imports = v.stmt.imports()
+	return
+}
+
+func Vars() *Variables {
+	return &Variables{}
+}
+
+type Variables []*Variable
+
+func (v *Variables) Add(i *Variable) *Variables {
+	if i != nil {
+		*v = append(*v, i)
+	}
+	return v
+}
+
+func (v Variables) Render(w io.Writer) (err error) {
+	stmt := newStatement()
+	stmt.Add(newToken("var"), newToken(" ("), Line())
+	for _, variable := range v {
+		codes := variable.stmt.Codes()[1:]
+		stmt.Add(Tab()).Add(codes...).Add(Line())
+	}
+	stmt.Add(newToken(")"), Line())
+	err = stmt.Render(w)
+	return
+}
+
+func (v Variables) imports() (imports Imports) {
+	imports = NewImports()
+	for _, variable := range v {
+		imports.Merge(variable.imports())
+	}
+	return
 }

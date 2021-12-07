@@ -33,7 +33,7 @@ func (c Codes) Render(w io.Writer) (err error) {
 	return
 }
 
-func (c Codes) imports(imports Imports) {
+func (c Codes) imports() (imports Imports) {
 	imports = NewImports()
 	for _, code := range c {
 		imports.Merge(code.imports())

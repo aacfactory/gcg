@@ -18,9 +18,10 @@ package gcg_test
 
 import (
 	"fmt"
-	"github.com/aacfactory/gcg"
 	"os"
 	"testing"
+
+	"github.com/aacfactory/gcg"
 )
 
 func TestLiteral(t *testing.T) {
@@ -42,4 +43,6 @@ func TestLiteral(t *testing.T) {
 	fmt.Println(p.Render(os.Stdout))
 	b := gcg.LiteralByte(byte('b'))
 	fmt.Println(b.Render(os.Stdout))
+	r := gcg.LiteralRune(rune('r'))
+	fmt.Println(r.Render(os.Stdout))
 }

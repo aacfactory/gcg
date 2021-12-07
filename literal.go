@@ -73,6 +73,13 @@ func LiteralByte(v byte) (code Code) {
 	return
 }
 
+func LiteralRune(v rune) (code Code) {
+	code = &literalCode{
+		v: strconv.QuoteRune(v),
+	}
+	return
+}
+
 type literalCode struct {
 	v string
 }
