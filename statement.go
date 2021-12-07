@@ -19,6 +19,7 @@ package gcg
 import (
 	"fmt"
 	"io"
+	"path"
 	"strings"
 )
 
@@ -62,90 +63,143 @@ func (s Statement) imports() (imports Imports) {
 	return
 }
 
-func newStatements() *Statements {
-	return &Statements{}
-}
-
-type Statements []*Statement
-
-func (s *Statements) Render(w io.Writer) (err error) {
-	for _, statement := range *s {
-		err = statement.Render(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-func (s *Statements) imports() (imports Imports) {
-	imports = NewImports()
-	for _, statement := range *s {
-		imports.Merge(statement.imports())
-	}
-	return
-}
-
-func (s *Statements) Add(v *Statement) *Statements {
-	if v == nil {
-		return s
-	}
-	*s = append(*s, v)
+func (s *Statement) Symbol(v string) *Statement {
+	s.Add(newToken(v))
 	return s
 }
 
-func Symbol(s string) (code Code) {
-	code = newToken(s)
+func Symbol(s string) (stmt *Statement) {
+	stmt = newStatement().Symbol(s)
 	return
 }
 
-func Space() (code Code) {
-	code = newToken(" ")
+func (s *Statement) Space() *Statement {
+	s.Add(newToken(" "))
+	return s
+}
+
+func Space() (stmt *Statement) {
+	stmt = newStatement().Space()
 	return
 }
 
-func Line() (code Code) {
-	code = newToken("\n")
+func (s *Statement) Line() *Statement {
+	s.Add(newToken("\n"))
+	return s
+}
+
+func Line() (stmt *Statement) {
+	stmt = newStatement().Line()
 	return
 }
 
-func Tab() (code Code) {
-	code = Tabs(1)
+func (s *Statement) Tab() *Statement {
+	s.Add(newToken("\t"))
+	return s
+}
+
+func Tab() (stmt *Statement) {
+	stmt = newStatement().Tab()
 	return
 }
 
-func Tabs(n int) (code Code) {
-	content := ""
+func (s *Statement) Tabs(n int) *Statement {
 	for i := 0; i < n; i++ {
-		content = content + "\t"
+		s.Add(newToken("\t"))
 	}
-	code = newToken(content)
+	return s
+}
+
+func Tabs(n int) (stmt *Statement) {
+	stmt = newStatement().Tabs(n)
 	return
 }
 
-func newToken(content string) *token {
-	return &token{
-		content: strings.TrimSpace(content),
-	}
+func (s *Statement) Ident(name string) *Statement {
+	s.Add(newToken(name))
+	return s
 }
 
-type token struct {
-	content string
-}
-
-func (t token) Render(w io.Writer) (err error) {
-	if t.content == "" {
-		return
-	}
-	_, err = w.Write([]byte(t.content))
-	if err != nil {
-		err = fmt.Errorf("render token %s failed, %v", t.content, err)
-		return
-	}
+func Ident(name string) (stmt *Statement) {
+	stmt = newStatement().Ident(name)
 	return
 }
 
-func (t token) imports() (imports Imports) {
-	imports = emptyImports
+func (s *Statement) QualifiedIdent(packagePath string, packageAlias, name string) *Statement {
+	packagePath = strings.TrimSpace(packagePath)
+	_, packageName := path.Split(packagePath)
+	packageAlias = strings.TrimSpace(packageAlias)
+	if packageAlias != "" {
+		packageName = packageAlias
+	}
+	_import := &Import{
+		Name:  packageName,
+		Alias: packageAlias,
+		Path:  packagePath,
+	}
+	s.Add(newToken(_import.Name), newToken("."), newToken(name, _import))
+	return s
+}
+
+func QualifiedIdent(packagePath string, packageAlias, name string) (stmt *Statement) {
+	stmt = newStatement().QualifiedIdent(packagePath, packageAlias, name)
+	return
+}
+
+func (s *Statement) Star() *Statement {
+	s.Add(Symbol("*"))
+	return s
+}
+
+func Star() (stmt *Statement) {
+	stmt = newStatement().Star()
+	return
+}
+
+func (s *Statement) Call(params ...Code) *Statement {
+	s.Add(newToken("("))
+	if params != nil {
+		for i, param := range params {
+			s.Add(param)
+			if i > 0 && i < len(params)-1 {
+				s.Add(newToken(","), Space())
+			}
+		}
+	}
+	s.Add(newToken(")"))
+	return s
+}
+
+func Call(params ...Code) (stmt *Statement) {
+	stmt = newStatement().Call(params...)
+	return
+}
+
+func (s *Statement) Comment(texts ...string) *Statement {
+	if texts == nil || len(texts) == 0 {
+		return s
+	}
+	for _, text := range texts {
+		s.Add(newToken(fmt.Sprintf("// %s\n", text)))
+	}
+	return s
+}
+
+func Comment(texts ...string) (stmt *Statement) {
+	stmt = newStatement().Comment(texts...)
+	return
+}
+
+func (s *Statement) Var(name string) *Statement {
+	if name == "" {
+		return s
+	}
+	s.Add(Keyword("var")).Add(Ident(name)).Add(Space())
+	return s
+}
+
+func Var(name string) (stmt *Statement) {
+	// all expr move into stmt
+	stmt = newStatement().Var(name)
 	return
 }

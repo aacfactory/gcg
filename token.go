@@ -23,31 +23,42 @@ import (
 	"strings"
 )
 
-func Keyword(ident string) (code Code) {
-	code = &keyword{
-		ident: strings.TrimSpace(ident),
+func newToken(content string, imports ...*Import) *token {
+	t := &token{
+		content:  strings.TrimSpace(content),
+		_imports: NewImports(),
 	}
-	return
+	if imports != nil {
+		for _, i := range imports {
+			t._imports.Add(i)
+		}
+	}
+	return t
 }
 
-type keyword struct {
-	ident string
+type token struct {
+	content  string
+	_imports Imports
 }
 
-func (k keyword) Render(w io.Writer) (err error) {
-	if k.ident == "default" {
-		_, err = w.Write([]byte(k.ident + ": "))
-	} else {
-		_, err = w.Write([]byte(k.ident + " "))
+func (t token) Render(w io.Writer) (err error) {
+	if t.content == "" {
+		return
 	}
+	_, err = w.Write([]byte(t.content))
 	if err != nil {
-		err = fmt.Errorf("render keywork %s failed, %v", k.ident, err)
+		err = fmt.Errorf("render token %s failed, %v", t.content, err)
 		return
 	}
 	return
 }
 
-func (k keyword) imports() (imports Imports) {
-	imports = emptyImports
+func (t token) imports() (imports Imports) {
+	imports = t._imports
+	return
+}
+
+func (t token) addImport(i *Import) {
+	t._imports.Add(i)
 	return
 }

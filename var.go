@@ -21,7 +21,7 @@ import (
 	"io"
 )
 
-func Var(ident string) (code *Variable) {
+func Var2(ident string) (code *Variable) {
 	code = &Variable{
 		stmt: newStatement(),
 	}
