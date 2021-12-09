@@ -17,42 +17,32 @@
 
 package gcg
 
-func Switch() *SwitchBuilder {
-	return &SwitchBuilder{
-		expression:   nil,
+func Select() *SelectBuilder {
+	return &SelectBuilder{
 		cases:        make([]*CaseElement, 0, 1),
 		defaultBlock: nil,
 	}
 }
 
-type SwitchBuilder struct {
-	expression   Code
+type SelectBuilder struct {
 	cases        []*CaseElement
 	defaultBlock Code
 }
 
-func (b *SwitchBuilder) Expression(code Code) {
-	b.expression = code
-}
-
-func (b *SwitchBuilder) Case(expression Code, block Code) {
+func (b *SelectBuilder) Case(expression Code, block Code) {
 	b.cases = append(b.cases, &CaseElement{
 		expression: expression,
 		block:      block,
 	})
 }
 
-func (b *SwitchBuilder) Default(block Code) {
+func (b *SelectBuilder) Default(block Code) {
 	b.defaultBlock = block
 }
 
-func (b *SwitchBuilder) Build() (code Code) {
+func (b *SelectBuilder) Build() (code Code) {
 	stmt := newStatement()
-	stmt.Keyword("switch")
-	if b.expression != nil {
-		stmt.Space().Add(b.expression)
-	}
-	stmt.Space().Symbol("{").Line()
+	stmt.Keyword("select").Space().Symbol("{").Line()
 	for _, sc := range b.cases {
 		stmt.Keyword("case").Space().Add(sc.expression).Colon().Line()
 		stmt.Tab().Add(sc.block).Line()
@@ -64,9 +54,4 @@ func (b *SwitchBuilder) Build() (code Code) {
 	stmt.Symbol("}").Line()
 	code = stmt
 	return
-}
-
-type CaseElement struct {
-	expression Code
-	block      Code
 }
