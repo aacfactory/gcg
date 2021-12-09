@@ -68,3 +68,34 @@ func TestType(t *testing.T) {
 	tx := gcg.Type("Hello", i.Build())
 	fmt.Println(tx.Render(os.Stdout))
 }
+
+func TestArray(t *testing.T) {
+
+	x := gcg.Array(gcg.Star().QualifiedIdent(gcg.NewPackage("foo/bar"), "A"))
+
+	fmt.Println(x.MapToType().Render(os.Stdout))
+	fmt.Println(x.MapToMakeSlice(0, 10).Render(os.Stdout))
+	fmt.Println(x.MapToMakeArray(10).Render(os.Stdout))
+
+}
+
+func TestMap(t *testing.T) {
+	key := gcg.Ident("string")
+	val := gcg.Ident("string")
+	x := gcg.Map(key, val)
+
+	fmt.Println(x.MapToType().Render(os.Stdout))
+	fmt.Println(x.MapToMake().Render(os.Stdout))
+
+}
+
+func TestChan(t *testing.T) {
+
+	x := gcg.Chan(gcg.Star().QualifiedIdent(gcg.NewPackage("foo/bar"), "A"))
+
+	fmt.Println(x.MapToType().Render(os.Stdout))
+	fmt.Println(x.MapToMake(10).Render(os.Stdout))
+	fmt.Println(x.MapToSendType().Render(os.Stdout))
+	fmt.Println(x.MapToConsumeType().Render(os.Stdout))
+
+}

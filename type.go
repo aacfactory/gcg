@@ -26,3 +26,89 @@ func Type(ident string, element Code, comments ...string) (code Code) {
 	code = stmt
 	return
 }
+
+func Array(elm Code) *ArrayBuilder {
+	return &ArrayBuilder{
+		elm: elm,
+	}
+}
+
+type ArrayBuilder struct {
+	elm Code
+}
+
+func (b *ArrayBuilder) MapToType() (code Code) {
+	stmt := newStatement().Token("[]").Add(b.elm)
+	code = stmt
+	return
+}
+
+func (b *ArrayBuilder) MapToMakeSlice(length int, capacity int) (code Code) {
+	stmt := newStatement().Token("make").Symbol("(").Token("[]").Add(b.elm).Symbol(",").Space().Literal(length).Symbol(",").Space().Literal(capacity).Symbol(")")
+	code = stmt
+	return
+}
+
+func (b *ArrayBuilder) MapToMakeArray(capacity int) (code Code) {
+	stmt := newStatement().Token("make").Symbol("(").Token("[]").Add(b.elm).Symbol(",").Space().Literal(capacity).Symbol(")")
+	code = stmt
+	return
+}
+
+func Map(key Code, val Code) *MapBuilder {
+	return &MapBuilder{
+		key: key,
+		val: val,
+	}
+}
+
+type MapBuilder struct {
+	key Code
+	val Code
+}
+
+func (b *MapBuilder) MapToType() (code Code) {
+	stmt := newStatement().Ident("map").Symbol("[").Add(b.key).Symbol("]").Add(b.val)
+	code = stmt
+	return
+}
+
+func (b *MapBuilder) MapToMake() (code Code) {
+	stmt := newStatement().Ident("make").Symbol("(").Add(b.MapToType()).Symbol(")")
+	code = stmt
+	return
+}
+
+func Chan(elm Code) *ChanBuilder {
+	return &ChanBuilder{
+		elm: elm,
+	}
+}
+
+type ChanBuilder struct {
+	elm Code
+}
+
+func (b *ChanBuilder) MapToType() (code Code) {
+	stmt := newStatement().Ident("chan").Space().Add(b.elm)
+	code = stmt
+	return
+}
+
+func (b *ChanBuilder) MapToSendType() (code Code) {
+	stmt := newStatement().Ident("chan<-").Space().Add(b.elm)
+	code = stmt
+	return
+}
+
+func (b *ChanBuilder) MapToConsumeType() (code Code) {
+	stmt := newStatement().Ident("<-chan").Space().Add(b.elm)
+	code = stmt
+	return
+}
+
+func (b *ChanBuilder) MapToMake(length int) (code Code) {
+	stmt := newStatement().Ident("make").Symbol("(").Ident("chan").Space().Add(b.elm).Symbol(",").Space().Literal(length).Symbol(")")
+	code = stmt
+	return
+}

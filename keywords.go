@@ -40,36 +40,6 @@ func Break() (code Code) {
 	return
 }
 
-func (s *Statement) Default() *Statement {
-	s.Keyword("default")
-	return s
-}
-
-func Default() (code Code) {
-	code = newStatement().Default()
-	return
-}
-
-func (s *Statement) Select() *Statement {
-	s.Keyword("select")
-	return s
-}
-
-func Select() (code Code) {
-	code = newStatement().Select()
-	return
-}
-
-func (s *Statement) Case() *Statement {
-	s.Keyword("case")
-	return s
-}
-
-func Case() (code Code) {
-	code = newStatement().Case()
-	return
-}
-
 func (s *Statement) Defer() *Statement {
 	s.Keyword("defer")
 	return s
@@ -90,36 +60,6 @@ func Go() (code Code) {
 	return
 }
 
-func (s *Statement) Map() *Statement {
-	s.Keyword("map")
-	return s
-}
-
-func Map() (code Code) {
-	code = newStatement().Map()
-	return
-}
-
-func (s *Statement) Chan() *Statement {
-	s.Keyword("chan")
-	return s
-}
-
-func Chan() (code Code) {
-	code = newStatement().Chan()
-	return
-}
-
-func (s *Statement) Else() *Statement {
-	s.Keyword("else")
-	return s
-}
-
-func Else() (code Code) {
-	code = newStatement().Else()
-	return
-}
-
 func (s *Statement) Goto() *Statement {
 	s.Keyword("goto")
 	return s
@@ -127,16 +67,6 @@ func (s *Statement) Goto() *Statement {
 
 func Goto() (code Code) {
 	code = newStatement().Goto()
-	return
-}
-
-func (s *Statement) Switch() *Statement {
-	s.Keyword("switch")
-	return s
-}
-
-func Switch() (code Code) {
-	code = newStatement().Switch()
 	return
 }
 
@@ -150,26 +80,6 @@ func Fallthrough() (code Code) {
 	return
 }
 
-func (s *Statement) If() *Statement {
-	s.Keyword("if")
-	return s
-}
-
-func If() (code Code) {
-	code = newStatement().If()
-	return
-}
-
-func (s *Statement) Range() *Statement {
-	s.Keyword("range")
-	return s
-}
-
-func Range() (code Code) {
-	code = newStatement().Range()
-	return
-}
-
 func (s *Statement) Continue() *Statement {
 	s.Keyword("continue")
 	return s
@@ -177,16 +87,6 @@ func (s *Statement) Continue() *Statement {
 
 func Continue() (code Code) {
 	code = newStatement().Continue()
-	return
-}
-
-func (s *Statement) For() *Statement {
-	s.Keyword("for")
-	return s
-}
-
-func For() (code Code) {
-	code = newStatement().For()
 	return
 }
 
