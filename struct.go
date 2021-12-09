@@ -18,51 +18,102 @@ package gcg
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
 func Struct() *StructBuilder {
 	return &StructBuilder{
-		group: Group("{", "}", "\n"),
+		fields:  make([]Code, 0, 1),
+		methods: make([]Code, 0, 1),
 	}
 }
 
 type StructBuilder struct {
-	group *StatementGroup
+	fields  []Code
+	methods []Code
 }
 
-func (s *StructBuilder) AddField(ident string, typ Code, tag Code, comments ...string) {
-	field := newStatement()
-	if comments != nil && len(comments) > 0 {
-		field.Comments(ident).Comments(comments...)
-	}
-	field.Ident(ident).Space().Add(typ)
-	if tag != nil {
-		field.Space().Add(tag)
-	}
-	s.group.Add(field)
+func (s *StructBuilder) AddField(field *StructFieldBuilder) {
+	s.fields = append(s.fields, field.Build())
+}
+
+func (s *StructBuilder) AddMethod(fn *FuncBuilder) {
+	s.methods = append(s.methods, fn.Build())
 }
 
 func (s *StructBuilder) Build() (code Code) {
 	stmt := newStatement()
-	stmt.Keyword("struct").Space().Add(s.group)
+	stmt.Keyword("struct").Space()
+	if len(s.fields) == 0 {
+		stmt.Token("{").Token("}")
+	} else {
+		group := Group("{", "}", "\n")
+		for _, field := range s.fields {
+			group.Add(field)
+		}
+		stmt.Add(group).Line()
+	}
+	if len(s.methods) > 0 {
+		for _, method := range s.methods {
+			stmt.Add(method).Line()
+		}
+	}
 	code = stmt
 	return
 }
 
-func StructFieldTag(ss ...string) (code Code) {
-	content := ""
-	size := len(ss) / 2
-	for i := 0; i < size; i++ {
-		key := strings.TrimSpace(ss[i])
-		val := strings.TrimSpace(ss[i+1])
-		content = content + " " + fmt.Sprintf("%s:\"%s\"", key, val)
+func StructField(name string) *StructFieldBuilder {
+	return &StructFieldBuilder{
+		comments: nil,
+		name:     strings.TrimSpace(name),
+		typ:      nil,
+		tags:     make(map[string]string),
 	}
-	if len(content) > 0 {
-		content = content[1:]
-	}
+}
+
+type StructFieldBuilder struct {
+	comments []string
+	name     string
+	typ      Code
+	tags     map[string]string
+}
+
+func (b *StructFieldBuilder) Type(code Code) {
+	b.typ = code
+}
+
+func (b *StructFieldBuilder) Tag(k string, v string) {
+	b.tags[strings.TrimSpace(k)] = strings.TrimSpace(v)
+}
+
+func (b *StructFieldBuilder) Comments(comments ...string) {
+	b.comments = comments
+}
+
+func (b *StructFieldBuilder) Build() (code Code) {
 	stmt := newStatement()
-	stmt.Token("`").Token(content).Token("`")
+	if b.comments != nil && len(b.comments) > 0 {
+		stmt.Comments(b.name)
+		stmt.Comments(b.comments...)
+	}
+	stmt.Ident(b.name).Space().Add(b.typ)
+	if len(b.tags) > 0 {
+		content := ""
+		tks := make([]string, 0, 1)
+		for k := range b.tags {
+			tks = append(tks, k)
+		}
+		sort.Strings(tks)
+		for _, k := range tks {
+			v := b.tags[k]
+			content = content + " " + fmt.Sprintf("%s:\"%s\"", k, v)
+		}
+		if len(content) > 0 {
+			content = content[1:]
+		}
+		stmt.Space().Token("`").Token(content).Token("`")
+	}
 	code = stmt
 	return
 }

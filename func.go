@@ -43,23 +43,37 @@ func Call(fnName string, params ...Code) (stmt *Statement) {
 
 func Func() (builder *FuncBuilder) {
 	builder = &FuncBuilder{
-		name:    "",
-		params:  make([]Code, 0, 1),
-		results: make([]Code, 0, 1),
-		body:    nil,
+		comments: nil,
+		receiver: nil,
+		name:     "",
+		params:   make([]Code, 0, 1),
+		results:  make([]Code, 0, 1),
+		body:     nil,
 	}
 	return
 }
 
 type FuncBuilder struct {
-	name    string
-	params  []Code
-	results []Code
-	body    Code
+	comments []string
+	receiver Code
+	name     string
+	params   []Code
+	results  []Code
+	body     Code
+}
+
+func (b *FuncBuilder) Receiver(ident string, typ Code) {
+	b.receiver = newStatement().Ident(ident).Space().Add(typ)
 }
 
 func (b *FuncBuilder) Name(name string) {
 	b.name = name
+}
+
+func (b *FuncBuilder) Comments(comments ...string) {
+	if comments != nil {
+		b.comments = comments
+	}
 }
 
 func (b *FuncBuilder) AddParam(name string, typ Code) {
@@ -83,7 +97,15 @@ func (b *FuncBuilder) Body(body Code) {
 
 func (b *FuncBuilder) Build() (code Code) {
 	stmt := newStatement()
-	stmt.Keyword("func").Space()
+	if len(b.comments) > 0 {
+		stmt.Comments(b.name)
+		stmt.Comments(b.comments...)
+	}
+	stmt.Keyword("func")
+	if b.receiver != nil {
+		stmt.Token("(").Add(b.receiver).Token(")")
+	}
+	stmt.Space()
 	if b.name != "" {
 		stmt.Ident(b.name)
 	}
