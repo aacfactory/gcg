@@ -44,4 +44,15 @@ func TestType(t *testing.T) {
 	// ident
 	ti := gcg.Type("Hello", gcg.Ident("string"))
 	fmt.Println(ti.Render(os.Stdout))
+
+	// interface
+	i := gcg.Interface()
+	i.Extend(gcg.QualifiedIdent(gcg.NewPackage("io"), "Writer"))
+	i.Extend(gcg.QualifiedIdent(gcg.NewPackage("io"), "Reader"))
+	ifn1 := gcg.InterfaceFn("D")
+	ifn1.AddParam("a", gcg.Ident("string"))
+	ifn1.AddResult("err", gcg.Ident("error"))
+	i.AddFn(ifn1, "1", "2")
+	tx := gcg.Type("Hello", i.Build())
+	fmt.Println(tx.Render(os.Stdout))
 }
