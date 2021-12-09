@@ -30,16 +30,7 @@ func (s *Statement) Literal(v interface{}) *Statement {
 	out := ""
 	switch v.(type) {
 	case string:
-		x := v.(string)
-		if strconv.CanBackquote(x) {
-			if strings.Contains(x, "\\") {
-				out = `"` + x + `"`
-			} else {
-				out = "`" + x + "`"
-			}
-		} else {
-			out = `"` + x + `"`
-		}
+		out = fmt.Sprintf("%#v", v)
 	case bool, int, complex128:
 		out = fmt.Sprintf("%#v", v)
 	case float32, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, uintptr:
