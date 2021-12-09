@@ -18,17 +18,14 @@ package gcg
 
 import (
 	"fmt"
-	"io"
 	"strconv"
 	"strings"
 )
 
-func Literal(v interface{}) (code Code) {
+func (s *Statement) Literal(v interface{}) *Statement {
 	if v == nil {
-		code = &literalCode{
-			v: "nil",
-		}
-		return
+		s.Add(newToken("nil"))
+		return s
 	}
 	out := ""
 	switch v.(type) {
@@ -60,36 +57,31 @@ func Literal(v interface{}) (code Code) {
 	default:
 		panic(fmt.Sprintf("gcg: unsupported type for literal: %T", v))
 	}
-	code = &literalCode{
-		v: out,
-	}
+	s.Add(newToken(out))
+	return s
+}
+
+func Literal(v interface{}) (code Code) {
+	code = newStatement().Literal(v)
 	return
+}
+
+func (s *Statement) LiteralByte(v byte) *Statement {
+	s.Add(newToken(fmt.Sprintf("byte('%s')", string(v))))
+	return s
 }
 
 func LiteralByte(v byte) (code Code) {
-	code = &literalCode{
-		v: fmt.Sprintf("byte('%s')", string(v)),
-	}
+	code = newStatement().LiteralByte(v)
 	return
+}
+
+func (s *Statement) LiteralRune(v rune) *Statement {
+	s.Add(newToken(fmt.Sprintf(strconv.QuoteRune(v))))
+	return s
 }
 
 func LiteralRune(v rune) (code Code) {
-	code = &literalCode{
-		v: strconv.QuoteRune(v),
-	}
-	return
-}
-
-type literalCode struct {
-	v string
-}
-
-func (l literalCode) Render(w io.Writer) (err error) {
-	_, err = w.Write([]byte(l.v))
-	return
-}
-
-func (l literalCode) imports() (imports Imports) {
-	imports = emptyImports
+	code = newStatement().LiteralRune(v)
 	return
 }

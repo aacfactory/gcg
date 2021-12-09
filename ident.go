@@ -5,42 +5,34 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 	http://www.apache.org/licenses/LICENSE-2.0
+ *  	http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package gcg_test
+package gcg
 
-import (
-	"fmt"
-	"github.com/aacfactory/gcg"
-	"os"
-	"testing"
-)
+func (s *Statement) Ident(name string) *Statement {
+	s.Token(name)
+	return s
+}
 
-func TestNewImports(t *testing.T) {
-	imports := gcg.NewImports()
-	imports.Add(&gcg.Import{
-		Name:  "foo",
-		Alias: "bar",
-		Path:  "x/foo",
-	})
-	imports.Add(&gcg.Import{
-		Name:  "foo",
-		Alias: "bar",
-		Path:  "x/foo",
-	})
-	imports.Add(&gcg.Import{
-		Name: "boo",
-		Path: "x/boo",
-	})
-	for _, i := range imports {
-		fmt.Println(i)
-	}
-	_ = imports.Render(os.Stdout)
+func Ident(name string) (stmt *Statement) {
+	stmt = newStatement().Ident(name)
+	return
+}
+
+func (s *Statement) QualifiedIdent(pkg *Package, name string) *Statement {
+	s.Token(pkg.Name).Dot().Token(name, pkg)
+	return s
+}
+
+func QualifiedIdent(pkg *Package, name string) (stmt *Statement) {
+	stmt = newStatement().QualifiedIdent(pkg, name)
+	return
 }

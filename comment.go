@@ -17,40 +17,20 @@
 package gcg
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"strings"
 )
 
-func Comments(texts []string) (code Code) {
-	code = &comments{
-		texts: texts,
+func (s *Statement) Comments(texts ...string) *Statement {
+	if texts == nil || len(texts) == 0 {
+		return s
 	}
-	return
+	for _, text := range texts {
+		s.Add(newToken(fmt.Sprintf("// %s\n", text)))
+	}
+	return s
 }
 
-type comments struct {
-	texts []string
-}
-
-func (c comments) Render(w io.Writer) (err error) {
-	if c.texts == nil || len(c.texts) == 0 {
-		return
-	}
-	buf := bytes.NewBufferString("")
-	for _, text := range c.texts {
-		buf.WriteString(fmt.Sprintf("// %s\n", strings.TrimSpace(text)))
-	}
-	_, err = buf.WriteTo(w)
-	if err != nil {
-		err = fmt.Errorf("render comments failed, %v", err)
-		return
-	}
-	return
-}
-
-func (c comments) imports() (imports Imports) {
-	imports = emptyImports
+func Comments(texts ...string) (code Code) {
+	code = newStatement().Comments(texts...)
 	return
 }

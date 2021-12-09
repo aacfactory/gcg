@@ -20,25 +20,34 @@ package gcg
 import (
 	"fmt"
 	"io"
-	"strings"
 )
 
-func newToken(content string, imports ...*Import) *token {
+func (s *Statement) Token(name string, ps ...*Package) *Statement {
+	s.Add(newToken(name, ps...))
+	return s
+}
+
+func Token(name string, ps ...*Package) (stmt *Statement) {
+	stmt = newStatement().Token(name, ps...)
+	return
+}
+
+func newToken(content string, ps ...*Package) *token {
 	t := &token{
-		content:  strings.TrimSpace(content),
-		_imports: NewImports(),
+		content: content,
+		ps:      NewPackages(),
 	}
-	if imports != nil {
-		for _, i := range imports {
-			t._imports.Add(i)
+	if ps != nil {
+		for _, i := range ps {
+			t.ps.Add(i)
 		}
 	}
 	return t
 }
 
 type token struct {
-	content  string
-	_imports Imports
+	content string
+	ps      Packages
 }
 
 func (t token) Render(w io.Writer) (err error) {
@@ -53,12 +62,12 @@ func (t token) Render(w io.Writer) (err error) {
 	return
 }
 
-func (t token) imports() (imports Imports) {
-	imports = t._imports
+func (t token) packages() (ps Packages) {
+	ps = t.ps
 	return
 }
 
-func (t token) addImport(i *Import) {
-	t._imports.Add(i)
+func (t token) addPackage(i *Package) {
+	t.ps.Add(i)
 	return
 }

@@ -19,8 +19,9 @@ package gcg
 import (
 	"fmt"
 	"go/format"
-	"golang.org/x/tools/imports"
 	"io"
+
+	"golang.org/x/tools/imports"
 )
 
 const (
@@ -32,8 +33,8 @@ type CodeBlock struct {
 
 type File struct {
 	packageName string
-	imports     Imports
-	decls       []Decl
+	packages    Packages
+	statement   *Statement
 }
 
 func (f *File) Render(w io.Writer) (err error) {

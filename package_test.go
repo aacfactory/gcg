@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package gcg
+package gcg_test
 
-func (s *Statement) Var(name string) *Statement {
-	if name == "" {
-		return s
-	}
-	s.Add(Keyword("var")).Add(Ident(name)).Add(Space())
-	return s
-}
+import (
+	"fmt"
+	"os"
+	"testing"
 
-func Var(name string) (stmt *Statement) {
-	// all expr move into stmt
-	stmt = newStatement().Var(name)
-	return
+	"github.com/aacfactory/gcg"
+)
+
+func TestNewImports(t *testing.T) {
+	ps := gcg.NewPackages()
+	ps.Add(gcg.NewPackage("fmt")).Add(gcg.NewPackageWithAlias("github.com/aacfactory/gcg", "a")).Add(gcg.NewPackage("github.com/aacfactory/gcg"))
+	ps.Add(gcg.NewPackage("xx/gg"))
+	code := ps.MapToCode()
+	fmt.Println(code.Render(os.Stdout))
 }

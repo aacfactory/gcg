@@ -15,3 +15,23 @@
  */
 
 package gcg
+
+import "io"
+
+func Struct() {
+
+}
+
+type _struct struct {
+	group *StatementGroup
+	ps    Packages
+}
+
+func (s _struct) Render(w io.Writer) (err error) {
+	return
+}
+
+func (s _struct) packages() (ps Packages) {
+	ps = s.ps
+	return
+}

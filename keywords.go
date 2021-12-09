@@ -17,37 +17,205 @@
 
 package gcg
 
-import (
-	"fmt"
-	"io"
-	"strings"
-)
+func (s *Statement) Keyword(ident string) *Statement {
+	if ident == "default" {
+		ident = ident + ":"
+	}
+	s.Add(newToken(ident))
+	return s
+}
 
 func Keyword(ident string) (code Code) {
-	code = &keyword{
-		ident: strings.TrimSpace(ident),
-	}
+	code = newStatement().Keyword(ident)
 	return
 }
 
-type keyword struct {
-	ident string
+func (s *Statement) Break() *Statement {
+	s.Keyword("break")
+	return s
 }
 
-func (k keyword) Render(w io.Writer) (err error) {
-	if k.ident == "default" {
-		_, err = w.Write([]byte(k.ident + ": "))
-	} else {
-		_, err = w.Write([]byte(k.ident + " "))
-	}
-	if err != nil {
-		err = fmt.Errorf("render keywork %s failed, %v", k.ident, err)
-		return
-	}
+func Break() (code Code) {
+	code = newStatement().Break()
 	return
 }
 
-func (k keyword) imports() (imports Imports) {
-	imports = emptyImports
+func (s *Statement) Default() *Statement {
+	s.Keyword("default")
+	return s
+}
+
+func Default() (code Code) {
+	code = newStatement().Default()
+	return
+}
+
+func (s *Statement) Func() *Statement {
+	s.Keyword("func")
+	return s
+}
+
+func Func() (code Code) {
+	code = newStatement().Func()
+	return
+}
+
+func (s *Statement) Interface() *Statement {
+	s.Keyword("interface")
+	return s
+}
+
+func Interface() (code Code) {
+	code = newStatement().Interface()
+	return
+}
+
+func (s *Statement) Select() *Statement {
+	s.Keyword("select")
+	return s
+}
+
+func Select() (code Code) {
+	code = newStatement().Select()
+	return
+}
+
+func (s *Statement) Case() *Statement {
+	s.Keyword("case")
+	return s
+}
+
+func Case() (code Code) {
+	code = newStatement().Case()
+	return
+}
+
+func (s *Statement) Defer() *Statement {
+	s.Keyword("defer")
+	return s
+}
+
+func Defer() (code Code) {
+	code = newStatement().Defer()
+	return
+}
+
+func (s *Statement) Go() *Statement {
+	s.Keyword("go")
+	return s
+}
+
+func Go() (code Code) {
+	code = newStatement().Go()
+	return
+}
+
+func (s *Statement) Map() *Statement {
+	s.Keyword("map")
+	return s
+}
+
+func Map() (code Code) {
+	code = newStatement().Map()
+	return
+}
+
+func (s *Statement) Chan() *Statement {
+	s.Keyword("chan")
+	return s
+}
+
+func Chan() (code Code) {
+	code = newStatement().Chan()
+	return
+}
+
+func (s *Statement) Else() *Statement {
+	s.Keyword("else")
+	return s
+}
+
+func Else() (code Code) {
+	code = newStatement().Else()
+	return
+}
+
+func (s *Statement) Goto() *Statement {
+	s.Keyword("goto")
+	return s
+}
+
+func Goto() (code Code) {
+	code = newStatement().Goto()
+	return
+}
+
+func (s *Statement) Switch() *Statement {
+	s.Keyword("switch")
+	return s
+}
+
+func Switch() (code Code) {
+	code = newStatement().Switch()
+	return
+}
+
+func (s *Statement) Fallthrough() *Statement {
+	s.Keyword("fallthrough")
+	return s
+}
+
+func Fallthrough() (code Code) {
+	code = newStatement().Fallthrough()
+	return
+}
+
+func (s *Statement) If() *Statement {
+	s.Keyword("if")
+	return s
+}
+
+func If() (code Code) {
+	code = newStatement().If()
+	return
+}
+
+func (s *Statement) Range() *Statement {
+	s.Keyword("range")
+	return s
+}
+
+func Range() (code Code) {
+	code = newStatement().Range()
+	return
+}
+
+func (s *Statement) Continue() *Statement {
+	s.Keyword("continue")
+	return s
+}
+
+func Continue() (code Code) {
+	code = newStatement().Continue()
+	return
+}
+
+func (s *Statement) For() *Statement {
+	s.Keyword("for")
+	return s
+}
+
+func For() (code Code) {
+	code = newStatement().For()
+	return
+}
+
+func (s *Statement) Return() *Statement {
+	s.Keyword("return")
+	return s
+}
+
+func Return() (code Code) {
+	code = newStatement().Return()
 	return
 }

@@ -18,19 +18,19 @@ package gcg_test
 
 import (
 	"fmt"
-	"github.com/aacfactory/gcg"
 	"os"
 	"testing"
+
+	"github.com/aacfactory/gcg"
 )
 
 func TestNewConstant(t *testing.T) {
 	c := gcg.Constant("foo", "hello")
 	fmt.Println(c.Render(os.Stdout))
 
-	cc := gcg.Constants(
-		gcg.Constant("foo", "hello", "foo", "comments"),
-		gcg.Constant("bar", 1),
-		gcg.Constant("baz", true, "baz", "comments"),
-	)
+	cc := gcg.Constants(map[string]interface{}{
+		"bar":   "bar",
+		"hello": "world",
+	})
 	fmt.Println(cc.Render(os.Stdout))
 }

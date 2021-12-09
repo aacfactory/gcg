@@ -24,7 +24,7 @@ type Render interface {
 
 type Code interface {
 	Render
-	imports() (imports Imports)
+	packages() (ps Packages)
 }
 
 type Codes []Code
@@ -33,14 +33,10 @@ func (c Codes) Render(w io.Writer) (err error) {
 	return
 }
 
-func (c Codes) imports() (imports Imports) {
-	imports = NewImports()
+func (c Codes) packages() (ps Packages) {
+	ps = NewPackages()
 	for _, code := range c {
-		imports.Merge(code.imports())
+		ps.Merge(code.packages())
 	}
 	return
-}
-
-type Decl interface {
-	Build() (code Code)
 }

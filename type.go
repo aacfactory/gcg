@@ -16,22 +16,13 @@
 
 package gcg
 
-import "io"
-
-func Type() {
-
-}
-
-type typeStruct struct {
-	stmt *Statement
-}
-
-func (t typeStruct) Render(w io.Writer) (err error) {
-
+func Type() (stmt *Statement) {
+	// ident
+	// struct
+	// func
 	return
 }
 
-func (t typeStruct) imports() (imports Imports) {
-	imports = t.stmt.imports()
-	return
-}
+type ZZ string
+
+type XX func(xx interface{})

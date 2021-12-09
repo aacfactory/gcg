@@ -15,3 +15,22 @@
  */
 
 package gcg
+
+func (s *Statement) Call(params ...Code) *Statement {
+	s.Token("(")
+	if params != nil {
+		for i, param := range params {
+			s.Add(param)
+			if i > 0 && i < len(params)-1 {
+				s.Symbol(",").Space()
+			}
+		}
+	}
+	s.Token(")")
+	return s
+}
+
+func Call(params ...Code) (stmt *Statement) {
+	stmt = newStatement().Call(params...)
+	return
+}
