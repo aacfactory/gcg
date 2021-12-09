@@ -16,16 +16,85 @@
 
 package gcg
 
-func (s *Statement) Var(name string) *Statement {
-	if name == "" {
-		return s
+func Vars() *VarsBuilder {
+	return &VarsBuilder{
+		items: make([]*VarBuilder, 0, 1),
 	}
-	s.Add(Keyword("var")).Add(Ident(name)).Add(Space())
-	return s
 }
 
-func Var(name string) (stmt *Statement) {
-	// all expr move into stmt
-	stmt = newStatement().Var(name)
+type VarsBuilder struct {
+	items []*VarBuilder
+}
+
+func (b *VarsBuilder) Add(v *VarBuilder) {
+	b.items = append(b.items, v)
+	return
+}
+
+func (b *VarsBuilder) Build() (code Code) {
+	stmt := newStatement()
+	if len(b.items) == 0 {
+		code = stmt
+		return
+	}
+	group := Group("(", ")", "\n")
+	for _, item := range b.items {
+		group.Add(item.BuildVarsElement())
+	}
+	stmt.Keyword("var").Space().Add(group).Line()
+	code = stmt
+	return
+}
+
+func Var(name string, typ Code) *VarBuilder {
+	return &VarBuilder{
+		ident: name,
+		typ:   typ,
+		value: nil,
+	}
+}
+
+type VarBuilder struct {
+	ident    string
+	typ      Code
+	value    Code
+	comments []string
+}
+
+func (b *VarBuilder) Comments(text ...string) {
+	b.comments = text
+}
+
+func (b *VarBuilder) Value(v Code) {
+	b.value = v
+}
+
+func (b *VarBuilder) Build() (code Code) {
+	stmt := newStatement()
+	if b.comments != nil && len(b.comments) > 0 {
+		stmt.Comments(b.ident)
+		stmt.Comments(b.comments...)
+	}
+	stmt.Keyword("var").Space().Ident(b.ident).Space().Add(b.typ)
+	if b.value != nil {
+		stmt.Space().Equal().Space().Add(b.value)
+	}
+	stmt.Line()
+	code = stmt
+	return
+}
+
+func (b *VarBuilder) BuildVarsElement() (code Code) {
+	stmt := newStatement()
+	if b.comments != nil && len(b.comments) > 0 {
+		stmt.Comments(b.ident)
+		stmt.Comments(b.comments...)
+	}
+	stmt.Ident(b.ident).Space().Add(b.typ)
+	if b.value != nil {
+		stmt.Space().Equal().Space().Add(b.value)
+	}
+	stmt.Line()
+	code = stmt
 	return
 }
