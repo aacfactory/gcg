@@ -16,22 +16,28 @@
 
 package gcg
 
-import "io"
-
-func Struct() {
-
+func NewStruct() *Struct {
+	return &Struct{
+		group: Group("{", "}", "\n"),
+	}
 }
 
-type _struct struct {
+type Struct struct {
 	group *StatementGroup
-	ps    Packages
 }
 
-func (s _struct) Render(w io.Writer) (err error) {
+func (s *Struct) AddField(field *StructField) {
+
+}
+
+func (s *Struct) MapToCode() (code Code) {
+
 	return
 }
 
-func (s _struct) packages() (ps Packages) {
-	ps = s.ps
-	return
+type StructField struct {
+	doc  []string
+	name string
+	typ  Code
+	tag  Code
 }

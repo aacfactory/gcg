@@ -28,9 +28,14 @@ func TestNewConstant(t *testing.T) {
 	c := gcg.Constant("foo", "hello")
 	fmt.Println(c.Render(os.Stdout))
 
-	cc := gcg.Constants(map[string]interface{}{
-		"bar":   "bar",
-		"hello": "world",
-	})
-	fmt.Println(cc.Render(os.Stdout))
+	cc := gcg.Constants()
+	cc.Add("a", "a")
+	cc.Add("b", "b")
+	fmt.Println(cc.MapToCode().Render(os.Stdout))
+
+	cc = gcg.Constants()
+	cc.Add("a", "a")
+	cc.Add("b", nil)
+	fmt.Println(cc.MapToCode().Render(os.Stdout))
+
 }

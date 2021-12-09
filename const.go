@@ -16,10 +16,6 @@
 
 package gcg
 
-import (
-	"sort"
-)
-
 func (s *Statement) Constant(ident string, lit interface{}) *Statement {
 	s.Keyword("const").Space().Ident(ident).Space().Symbol("=").Space().Literal(lit).Line()
 	return s
@@ -30,22 +26,30 @@ func Constant(ident string, lit interface{}) (stmt *Statement) {
 	return
 }
 
-func Constants(items map[string]interface{}) (stmt *Statement) {
-	stmt = newStatement()
+func Constants() (c *constants) {
+	c = &constants{
+		group: Group("(", ")", "\n"),
+	}
+	return
+}
+
+type constants struct {
+	group *StatementGroup
+}
+
+func (c *constants) Add(ident string, lit interface{}) {
+	if lit == nil {
+		c.group.Add(Ident(ident))
+	} else {
+		c.group.Add(Ident(ident).Space().Equal().Space().Literal(lit))
+	}
+	return
+}
+
+func (c *constants) MapToCode() (code Code) {
+	stmt := newStatement()
 	stmt.Keyword("const").Space()
-	group := Group("(", ")", "\n")
-	idents := make([]string, 0, 1)
-	for ident := range items {
-		if ident == "" {
-			continue
-		}
-		idents = append(idents, ident)
-	}
-	sort.Strings(idents)
-	for _, ident := range idents {
-		lit := items[ident]
-		group.Add(Ident(ident).Space().Equal().Space().Literal(lit))
-	}
-	stmt.Add(group).Line()
+	stmt.Add(c.group).Line()
+	code = stmt
 	return
 }

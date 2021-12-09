@@ -16,7 +16,13 @@
 
 package gcg
 
-func (s *Statement) Call(params ...Code) *Statement {
+import "strings"
+
+func (s *Statement) Call(fnName string, params ...Code) *Statement {
+	fnName = strings.TrimSpace(fnName)
+	if fnName != "" {
+		s.Token(fnName)
+	}
 	s.Token("(")
 	if params != nil {
 		for i, param := range params {
@@ -30,7 +36,7 @@ func (s *Statement) Call(params ...Code) *Statement {
 	return s
 }
 
-func Call(params ...Code) (stmt *Statement) {
-	stmt = newStatement().Call(params...)
+func Call(fnName string, params ...Code) (stmt *Statement) {
+	stmt = newStatement().Call(fnName, params...)
 	return
 }

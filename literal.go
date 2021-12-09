@@ -32,7 +32,11 @@ func (s *Statement) Literal(v interface{}) *Statement {
 	case string:
 		x := v.(string)
 		if strconv.CanBackquote(x) {
-			out = "`" + x + "`"
+			if strings.Contains(x, "\\") {
+				out = `"` + x + `"`
+			} else {
+				out = "`" + x + "`"
+			}
 		} else {
 			out = `"` + x + `"`
 		}
