@@ -31,11 +31,11 @@ func TestNewConstant(t *testing.T) {
 	cc := gcg.Constants()
 	cc.Add("a", "a")
 	cc.Add("b", "b")
-	fmt.Println(cc.MapToCode().Render(os.Stdout))
+	fmt.Println(cc.Build().Render(os.Stdout))
 
 	cc = gcg.Constants()
 	cc.Add("a", "a")
 	cc.Add("b", nil)
-	fmt.Println(cc.MapToCode().Render(os.Stdout))
+	fmt.Println(cc.Build().Render(os.Stdout))
 
 }

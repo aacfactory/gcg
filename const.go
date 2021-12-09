@@ -26,18 +26,18 @@ func Constant(ident string, lit interface{}) (stmt *Statement) {
 	return
 }
 
-func Constants() (c *constants) {
-	c = &constants{
+func Constants() (c *ConstantsBuilder) {
+	c = &ConstantsBuilder{
 		group: Group("(", ")", "\n"),
 	}
 	return
 }
 
-type constants struct {
+type ConstantsBuilder struct {
 	group *StatementGroup
 }
 
-func (c *constants) Add(ident string, lit interface{}) {
+func (c *ConstantsBuilder) Add(ident string, lit interface{}) {
 	if lit == nil {
 		c.group.Add(Ident(ident))
 	} else {
@@ -46,7 +46,7 @@ func (c *constants) Add(ident string, lit interface{}) {
 	return
 }
 
-func (c *constants) MapToCode() (code Code) {
+func (c *ConstantsBuilder) Build() (code Code) {
 	stmt := newStatement()
 	stmt.Keyword("const").Space()
 	stmt.Add(c.group).Line()

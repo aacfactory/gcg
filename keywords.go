@@ -21,7 +21,7 @@ func (s *Statement) Keyword(ident string) *Statement {
 	if ident == "default" {
 		ident = ident + ":"
 	}
-	s.Add(newToken(ident))
+	s.Token(ident)
 	return s
 }
 
