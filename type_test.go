@@ -31,7 +31,7 @@ func TestType(t *testing.T) {
 	s.AddField("Name", gcg.Ident("string"), gcg.StructFieldTag("json", "name", "xml", "name"), "name", "string")
 	s.AddField("Age", gcg.Ident("int"), gcg.StructFieldTag("json", "age", "xml", "age"))
 	s.AddField("World", gcg.QualifiedIdent(gcg.NewPackage("foo/bar"), "World"), nil)
-	ts := gcg.Type("Hello", s.MapToCode())
+	ts := gcg.Type("Hello", s.Build())
 	fmt.Println(ts.Render(os.Stdout))
 	// func
 	fnb := gcg.Func()

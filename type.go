@@ -16,8 +16,12 @@
 
 package gcg
 
-func Type(ident string, element Code) (code Code) {
+func Type(ident string, element Code, comments ...string) (code Code) {
 	stmt := newStatement()
+	if comments != nil && len(comments) > 0 {
+		stmt.Comments(ident)
+		stmt.Comments(comments...)
+	}
 	stmt.Keyword("type").Space().Ident(ident).Space().Add(element).Line()
 	code = stmt
 	return

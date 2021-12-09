@@ -21,17 +21,17 @@ import (
 	"strings"
 )
 
-func Struct() *_struct {
-	return &_struct{
+func Struct() *StructBuilder {
+	return &StructBuilder{
 		group: Group("{", "}", "\n"),
 	}
 }
 
-type _struct struct {
+type StructBuilder struct {
 	group *StatementGroup
 }
 
-func (s *_struct) AddField(ident string, typ Code, tag Code, comments ...string) {
+func (s *StructBuilder) AddField(ident string, typ Code, tag Code, comments ...string) {
 	field := newStatement()
 	if comments != nil && len(comments) > 0 {
 		field.Comments(ident).Comments(comments...)
@@ -43,7 +43,7 @@ func (s *_struct) AddField(ident string, typ Code, tag Code, comments ...string)
 	s.group.Add(field)
 }
 
-func (s *_struct) MapToCode() (code Code) {
+func (s *StructBuilder) Build() (code Code) {
 	stmt := newStatement()
 	stmt.Keyword("struct").Space().Add(s.group)
 	code = stmt
