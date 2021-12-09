@@ -17,18 +17,56 @@
 
 package gcg
 
+func Switch() *SwitchBuilder {
+	return &SwitchBuilder{
+		expression:   nil,
+		cases:        make([]*SwitchCase, 0, 1),
+		defaultBlock: nil,
+	}
+}
+
 type SwitchBuilder struct {
-	expression Code
+	expression   Code
+	cases        []*SwitchCase
+	defaultBlock Code
+}
+
+func (b *SwitchBuilder) Expression(code Code) {
+	b.expression = code
+}
+
+func (b *SwitchBuilder) Case(expression Code, block Code) {
+	b.cases = append(b.cases, &SwitchCase{
+		expression: expression,
+		block:      block,
+	})
+}
+
+func (b *SwitchBuilder) Default(block Code) {
+	b.defaultBlock = block
 }
 
 func (b *SwitchBuilder) Build() (code Code) {
-	switch xx {
-	case:
-
-	case:
-
-	default:
-
+	stmt := newStatement()
+	stmt.Keyword("switch")
+	if b.expression != nil {
+		stmt.Space().Add(b.expression)
 	}
+	stmt.Space().Symbol("{").Line()
+	for _, sc := range b.cases {
+		stmt.Keyword("case").Space().Add(sc.expression).Colon().Line()
+		stmt.Tab().Add(sc.block).Line()
+	}
+	if b.defaultBlock != nil {
+		stmt.Keyword("default").Colon().Line()
+		stmt.Tab().Add(b.defaultBlock).Line()
+	}
+	stmt.Symbol("}").Line()
+	code = stmt
 	return
+}
+
+type SwitchCase struct {
+	expression Code
+	block      Code
 }

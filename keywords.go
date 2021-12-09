@@ -18,9 +18,6 @@
 package gcg
 
 func (s *Statement) Keyword(ident string) *Statement {
-	if ident == "default" {
-		ident = ident + ":"
-	}
 	s.Token(ident)
 	return s
 }
