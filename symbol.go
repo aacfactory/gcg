@@ -158,3 +158,13 @@ func Star() (stmt *Statement) {
 	stmt = newStatement().Star()
 	return
 }
+
+func (s *Statement) And() *Statement {
+	s.Symbol("&")
+	return s
+}
+
+func And() (stmt *Statement) {
+	stmt = newStatement().And()
+	return
+}

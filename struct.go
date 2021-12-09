@@ -16,28 +16,53 @@
 
 package gcg
 
-func NewStruct() *Struct {
-	return &Struct{
+import (
+	"fmt"
+	"strings"
+)
+
+func Struct() *_struct {
+	return &_struct{
 		group: Group("{", "}", "\n"),
 	}
 }
 
-type Struct struct {
+type _struct struct {
 	group *StatementGroup
 }
 
-func (s *Struct) AddField(field *StructField) {
-
+func (s *_struct) AddField(ident string, typ Code, tag Code, comments ...string) {
+	field := newStatement()
+	if comments != nil && len(comments) > 0 {
+		field.Comments(ident).Comments(comments...)
+	}
+	field.Ident(ident).Space().Add(typ)
+	if tag != nil {
+		field.Space().Add(tag)
+	}
+	s.group.Add(field)
 }
 
-func (s *Struct) MapToCode() (code Code) {
-
+func (s *_struct) MapToCode() (code Code) {
+	stmt := newStatement()
+	stmt.Keyword("struct").Space().Add(s.group)
+	code = stmt
 	return
 }
 
-type StructField struct {
-	doc  []string
-	name string
-	typ  Code
-	tag  Code
+func StructFieldTag(ss ...string) (code Code) {
+	content := ""
+	size := len(ss) / 2
+	for i := 0; i < size; i++ {
+		key := strings.TrimSpace(ss[i])
+		val := strings.TrimSpace(ss[i+1])
+		content = content + " " + fmt.Sprintf("%s:\"%s\"", key, val)
+	}
+	if len(content) > 0 {
+		content = content[1:]
+	}
+	stmt := newStatement()
+	stmt.Token("`").Token(content).Token("`")
+	code = stmt
+	return
 }

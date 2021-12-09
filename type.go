@@ -16,13 +16,9 @@
 
 package gcg
 
-func Type() (stmt *Statement) {
-	// ident
-	// struct
-	// func
+func Type(ident string, element Code) (code Code) {
+	stmt := newStatement()
+	stmt.Keyword("type").Space().Ident(ident).Space().Add(element).Line()
+	code = stmt
 	return
 }
-
-type ZZ string
-
-type XX func(xx interface{})

@@ -17,8 +17,10 @@
 package gcg
 
 import (
+	"bytes"
 	"fmt"
 	"go/format"
+	"io"
 )
 
 func reformat(p []byte) (b []byte, err error) {
@@ -27,5 +29,35 @@ func reformat(p []byte) (b []byte, err error) {
 		err = fmt.Errorf("reformat code failed, %v", err)
 		return
 	}
+	return
+}
+
+func newReformatWriter() *reformatWriter {
+	return &reformatWriter{
+		buf: bytes.NewBufferString(""),
+	}
+}
+
+type reformatWriter struct {
+	buf *bytes.Buffer
+}
+
+func (r *reformatWriter) WriteTo(w io.Writer) (n int64, err error) {
+	b, fmtErr := reformat(r.buf.Bytes())
+	if fmtErr != nil {
+		err = fmtErr
+		return
+	}
+	wn, wErr := w.Write(b)
+	if wErr != nil {
+		err = wErr
+		return
+	}
+	n = int64(wn)
+	return
+}
+
+func (r *reformatWriter) Write(p []byte) (n int, err error) {
+	n, err = r.buf.Write(p)
 	return
 }
