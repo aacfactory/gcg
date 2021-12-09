@@ -34,7 +34,13 @@ func TestType(t *testing.T) {
 	ts := gcg.Type("Hello", s.MapToCode())
 	fmt.Println(ts.Render(os.Stdout))
 	// func
-
+	fnb := gcg.Func()
+	fnb.AddParam("p1", gcg.Ident("string"))
+	fnb.AddParam("p2", gcg.Star().QualifiedIdent(gcg.NewPackage("foo/bar"), "G"))
+	fnb.AddResult("r1", gcg.Ident("string"))
+	fnb.AddResult("err", gcg.Ident("error"))
+	tf := gcg.Type("Hello", fnb.Build())
+	fmt.Println(tf.Render(os.Stdout))
 	// ident
 	ti := gcg.Type("Hello", gcg.Ident("string"))
 	fmt.Println(ti.Render(os.Stdout))

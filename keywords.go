@@ -50,16 +50,6 @@ func Default() (code Code) {
 	return
 }
 
-func (s *Statement) Func() *Statement {
-	s.Keyword("func")
-	return s
-}
-
-func Func() (code Code) {
-	code = newStatement().Func()
-	return
-}
-
 func (s *Statement) Interface() *Statement {
 	s.Keyword("interface")
 	return s
