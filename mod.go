@@ -23,6 +23,19 @@ type Module struct {
 	Requires  []Require
 }
 
+func (mod Module) String() (s string) {
+	s = mod.Name + " " + mod.Path + "\n"
+	s = s + mod.GoVersion + "\n"
+	for _, require := range mod.Requires {
+		s = s + require.Name + " " + require.Version
+		if require.Replace != "" {
+			s = s + " => " + require.Replace
+		}
+		s = s + "\n"
+	}
+	return
+}
+
 type Require struct {
 	Name           string
 	Version        string
