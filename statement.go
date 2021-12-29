@@ -21,6 +21,10 @@ import (
 	"strings"
 )
 
+func Statements() *Statement {
+	return newStatement()
+}
+
 func newStatement() *Statement {
 	return &Statement{}
 }
