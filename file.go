@@ -102,10 +102,6 @@ func (f *File) Render(w io.Writer) (err error) {
 	return
 }
 
-func (f *File) renderFile() {
-
-}
-
 func (f *File) fillImports() {
 	f.imports.Merge(f.statement.packages())
 }
