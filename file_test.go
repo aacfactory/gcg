@@ -18,6 +18,7 @@
 package gcg_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -123,4 +124,16 @@ func addStructFunc2(f *gcg.File) {
 	code.Body(body)
 
 	f.AddCode(code.Build())
+}
+
+func TestFileExist(t *testing.T) {
+	fmt.Println("ok", gcg.FileExist("/Users/wangminxiang/Game/sss"), gcg.FileExist("/Users/wangminxiang/Game/sss/a.txt"))
+	fmt.Println("ko", gcg.FileExist("/Users/wangminxiang/Game/ss"), gcg.FileExist("/Users/wangminxiang/Game/sss/b.txt"))
+}
+
+func TestFileRender(t *testing.T) {
+	x := "/Users/wangminxiang/Game/sss/a.txt"
+	w := gcg.FileRender(x, true)
+	w.Write([]byte("x"))
+	w.Close()
 }
