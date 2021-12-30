@@ -25,7 +25,47 @@ import (
 	"strings"
 )
 
-func NewProject(rootDir string) (p *Project, err error) {
+type ProjectOptions struct {
+	RemoveBeforeRender bool
+	Hooks              []ProjectHook
+}
+
+type ProjectHook interface {
+}
+
+type ProjectOption func(*ProjectOptions) error
+
+func ProjectRemoveBeforeRender(ok bool) ProjectOption {
+	return func(options *ProjectOptions) error {
+		options.RemoveBeforeRender = ok
+		return nil
+	}
+}
+
+func ProjectRenderHook(v ProjectHook) ProjectOption {
+	return func(options *ProjectOptions) error {
+		if v == nil {
+			return fmt.Errorf("project hook is nil")
+		}
+		options.Hooks = append(options.Hooks, v)
+		return nil
+	}
+}
+
+func NewProject(rootDir string, opts ...ProjectOption) (p *Project, err error) {
+	opt := &ProjectOptions{
+		RemoveBeforeRender: false,
+		Hooks:              make([]ProjectHook, 0, 1),
+	}
+	if opts != nil && len(opts) > 0 {
+		for _, option := range opts {
+			optErr := option(opt)
+			if optErr != nil {
+				err = fmt.Errorf("gcg: new project failed, %v", optErr)
+				return
+			}
+		}
+	}
 	rootDir = strings.TrimSpace(rootDir)
 	if rootDir == "" {
 		err = fmt.Errorf("gcg: new project failed for root dir is empty")
@@ -40,11 +80,6 @@ func NewProject(rootDir string) (p *Project, err error) {
 	}
 	rootDir = strings.ReplaceAll(rootDir, "\\", "/")
 	rootDir = filepath.Clean(rootDir)
-	_, lstatErr := os.Lstat(rootDir)
-	// todo check dir exist
-	if !os.IsNotExist(lstatErr) {
-
-	}
 
 	gopath, hasGoPathEnv := os.LookupEnv("GOPATH")
 	if !hasGoPathEnv {
@@ -66,14 +101,18 @@ func NewProject(rootDir string) (p *Project, err error) {
 	modPath := rootDir[len(gopath):]
 	_, modName := filepath.Split(modPath)
 
+	version := runtime.Version()
+	versionItems := strings.Split(version, ".")
+	version = versionItems[0][2:] + "." + versionItems[1]
 	mod := &Module{
 		Name:      modName,
 		Path:      modPath,
-		GoVersion: runtime.Version(),
+		GoVersion: version,
 		Requires:  make([]Require, 0, 1),
 	}
 
 	p = &Project{
+		opt:       opt,
 		path:      rootDir,
 		mod:       mod,
 		resources: make(map[string][]byte),
@@ -84,6 +123,7 @@ func NewProject(rootDir string) (p *Project, err error) {
 }
 
 type Project struct {
+	opt       *ProjectOptions
 	path      string
 	mod       *Module
 	resources map[string][]byte
@@ -127,6 +167,13 @@ func (p *Project) AddFile(filename string, file *File) (err error) {
 	if file == nil {
 		return
 	}
+	ext := filepath.Ext(filename)
+	if ext == "" {
+		filename = fmt.Sprintf("%s.go", filename)
+	} else if ext != "go" {
+		err = fmt.Errorf("gcg: project add file failed for filename is invalid")
+		return
+	}
 	_, has := p.files[filename]
 	if has {
 		err = fmt.Errorf("gcg: project add file failed for filename is exist")
@@ -153,7 +200,36 @@ func (p *Project) AddFolder(name string) (v *Folder) {
 	return
 }
 
-func (p *Project) Write() (err error) {
+func (p *Project) Render() (err error) {
+	err = p.renderDir()
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (p *Project) renderDir() (err error) {
+	if FileExist(p.path) {
+		if !p.opt.RemoveBeforeRender {
+			err = fmt.Errorf("gcg: project render failed for dir is exist")
+			return
+		}
+		rmErr := os.RemoveAll(p.path)
+		if rmErr != nil {
+			err = fmt.Errorf("gcg: project render failed for remove dir failed, %v", rmErr)
+			return
+		}
+	}
+	createErr := os.MkdirAll(p.path, os.ModeDir)
+	if createErr != nil {
+		err = fmt.Errorf("gcg: project render failed for create dir failed, %v", createErr)
+		return
+	}
+	return
+}
+
+func (p *Project) renderMod() (err error) {
 
 	return
 }

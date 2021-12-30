@@ -16,6 +16,11 @@
 
 package gcg
 
+import (
+	"bytes"
+	"fmt"
+)
+
 type Module struct {
 	Name      string
 	Path      string
@@ -24,15 +29,34 @@ type Module struct {
 }
 
 func (mod Module) String() (s string) {
-	s = mod.Name + " " + mod.Path + "\n"
-	s = s + mod.GoVersion + "\n"
-	for _, require := range mod.Requires {
-		s = s + require.Name + " " + require.Version
-		if require.Replace != "" {
-			s = s + " => " + require.Replace
+	b := bytes.NewBufferString("")
+	_, _ = b.WriteString(fmt.Sprintf("module %s\n\n", mod.Path))
+	_, _ = b.WriteString(fmt.Sprintf("go %s\n\n", mod.GoVersion))
+	if len(mod.Requires) > 0 {
+		replaces := make([]Require, 0, 1)
+		_, _ = b.WriteString("require (\n")
+		for _, require := range mod.Requires {
+			_, _ = b.WriteString(fmt.Sprintf("\t%s %s", require.Name, require.Version))
+			if require.Indirect {
+				_, _ = b.WriteString(" // indirect\n")
+			} else {
+				_, _ = b.WriteString("\n")
+			}
+			if require.Replace != "" {
+				replaces = append(replaces, require)
+			}
 		}
-		s = s + "\n"
+		_, _ = b.WriteString(")\n\n")
+
+		if len(replaces) > 0 {
+			_, _ = b.WriteString("replace (\n")
+			for _, require := range replaces {
+				_, _ = b.WriteString(fmt.Sprintf("\t%s %s => %v %v \n", require.Name, require.Version, require.Replace, require.ReplaceVersion))
+			}
+			_, _ = b.WriteString(")\n\n")
+		}
 	}
+	s = b.String()
 	return
 }
 
