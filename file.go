@@ -70,6 +70,7 @@ func (f *File) AddCode(code Code) {
 }
 
 func (f *File) Render(w io.Writer) (err error) {
+	f.fillImports()
 	stmt := newStatement()
 	// file comments
 	stmt.Comments(f.fileComments...)
