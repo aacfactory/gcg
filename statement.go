@@ -49,6 +49,9 @@ func (s Statement) Render(w io.Writer) (err error) {
 		return
 	}
 	for _, code := range s {
+		if code == nil {
+			continue
+		}
 		err = code.Render(w)
 		if err != nil {
 			return
@@ -85,6 +88,9 @@ type StatementGroup struct {
 }
 
 func (s *StatementGroup) Add(code Code) *StatementGroup {
+	if code == nil {
+		return s
+	}
 	s.items = append(s.items, code)
 	return s
 }
@@ -93,6 +99,9 @@ func (s StatementGroup) Render(w io.Writer) (err error) {
 	stmt := newStatement()
 	stmt.Add(newToken(s.open)).Line()
 	for _, item := range s.items {
+		if item == nil {
+			continue
+		}
 		stmt.Tab().Add(item).Add(newToken(s.separator))
 	}
 	stmt.Add(newToken(s.close))
@@ -103,6 +112,9 @@ func (s StatementGroup) Render(w io.Writer) (err error) {
 func (s StatementGroup) packages() (ps Packages) {
 	ps = NewPackages()
 	for _, item := range s.items {
+		if item == nil {
+			continue
+		}
 		ps.Merge(item.packages())
 	}
 	return
