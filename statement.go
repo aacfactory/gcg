@@ -60,6 +60,9 @@ func (s Statement) Render(w io.Writer) (err error) {
 func (s Statement) packages() (ps Packages) {
 	ps = NewPackages()
 	for _, code := range s {
+		if code == nil {
+			continue
+		}
 		ps.Merge(code.packages())
 	}
 	return
