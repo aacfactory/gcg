@@ -47,6 +47,22 @@ func NewFile(packageName string) (f *File) {
 	return
 }
 
+func NewFileWithoutNote(packageName string) (f *File) {
+	packageName = strings.TrimSpace(packageName)
+	if packageName == "" {
+		panic(fmt.Errorf("gcg: new file failed for package name is empty"))
+		return
+	}
+	fileComments := make([]string, 0, 1)
+	f = &File{
+		fileComments: fileComments,
+		packageName:  packageName,
+		imports:      NewPackages(),
+		statement:    newStatement(),
+	}
+	return
+}
+
 type File struct {
 	fileComments []string
 	packageName  string
