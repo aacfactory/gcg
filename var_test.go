@@ -49,4 +49,9 @@ func TestVars(t *testing.T) {
 	x.Add(b)
 	fmt.Println(x.Build().Render(os.Stdout))
 
+	fmt.Println("---")
+	vars := gcg.Vars()
+	vars.Add(gcg.Var("a", gcg.Token(" = []byte{}")))
+	vars.Add(gcg.Var("b", gcg.Token(" = []byte{}")))
+	fmt.Println(vars.Build().Render(os.Stdout))
 }

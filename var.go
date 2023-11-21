@@ -37,7 +37,7 @@ func (b *VarsBuilder) Build() (code Code) {
 		code = stmt
 		return
 	}
-	group := Group("(", ")", "\n")
+	group := Group("(", ")", "")
 	for _, item := range b.items {
 		group.Add(item.BuildVarsElement())
 	}
